@@ -20,6 +20,33 @@ Personal fork of [Nimble Commander](https://github.com/mikekazakov/nimble-comman
 
 See `COLUMN_BROWSER_PLAN.md` for full architecture and phased implementation plan.
 
+## Column Browser Status (as of 2026-04-12)
+
+**Working:**
+- 4th presentation mode, accessible via Ctrl+6 (layout slot 6)
+- Ancestor columns (left of active) with sorted/filtered VFSListings
+- Active column backed by panel's data::Model (full NC functionality)
+- Preview column (right of active) — shows directory contents as cursor moves
+- Left/Right arrow navigation (Left=parent, Right=enter directory)
+- Global sort mode sync via IndirectListingComparator across all columns
+- Hidden files toggle applies to all columns
+- File/folder icons in all columns (active uses full icon repository)
+- Active/inactive emphasis toggle (blue/grey on Tab)
+- Tabs work out of the box
+
+**Known bugs (see COLUMN_BROWSER_PLAN.md):**
+- Ancestor highlight beyond immediate parent doesn't stick
+- Horizontal scroll gesture doesn't work (nested NSScrollView issue)
+- NC theme colors not matched (uses system blue/grey instead)
+
+## Key Files
+
+- `Source/NimbleCommander/.../ColumnBrowser/PanelColumnBrowserView.h/.mm` — the view (~1065 LOC)
+- `Source/NimbleCommander/.../ColumnBrowser/Layout.h` — layout config struct
+- `Source/NimbleCommander/.../PanelViewImplementationProtocol.h` — added onMoveLeft:/onMoveRight:
+- `Source/NimbleCommander/.../PanelView.mm` — arrow key dispatch guards
+- User config: `~/Library/Application Support/Nimble Commander/Config/Config.json` (layout slot 6)
+
 ## Pulling Upstream Updates
 
 ```
