@@ -210,6 +210,14 @@ Add new files to the Xcode project / CMake build target.
 - [ ] Click-to-navigate in ancestor columns (click item in parent → active column changes)
 - [ ] Animated column transitions
 
+## Known Bugs / Deferred Work
+
+- [ ] **Ancestor sort mode sync**: `buildSortedIndices` always sorts alphabetically. Need to pass the panel's `SortMode` and reimplement full sort logic (by size, date, extension, etc.) for VFSListing entries. Critical — global sort is core to why this project exists.
+- [ ] **Ancestor highlight beyond immediate parent**: `selectRowIndexes:` on newly-created NSTableViews doesn't stick for columns beyond the immediate parent. May need custom cell background drawing instead of NSTableView selection.
+- [ ] **Horizontal scroll gesture**: Nested NSScrollViews prevent trackpad horizontal scroll from reaching the outer container. Need custom scroll event forwarding or a different container approach.
+- [ ] **File icons in all columns**: No icons yet in any column.
+- [ ] **NC theme color matching**: Selection highlight uses system blue/grey rather than NC's theme-specific colors (FilePanelsBriefFocusedActive/InactiveItemBackgroundColor).
+
 ## Risks
 
 | Risk | Impact | Mitigation |

@@ -63,4 +63,12 @@ class Model;
 // Called by the owning PanelView when the "panel.scroll_next_page" action is triggered
 - (void)onPageDown:(NSEvent *)_event;
 
+// Called by the owning PanelView when "panel.move_left" is triggered.
+// Return true if the view handled the event (PanelView will skip default handling).
+- (bool)onMoveLeft:(NSEvent *)_event;
+
+// Called by the owning PanelView when "panel.move_right" is triggered.
+// Return true if the view handled the event (PanelView will skip default handling).
+- (bool)onMoveRight:(NSEvent *)_event;
+
 @end

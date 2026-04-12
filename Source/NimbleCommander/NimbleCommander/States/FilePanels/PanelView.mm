@@ -399,9 +399,12 @@ struct StateStorage {
     [self OnCursorPositionChanged];
 }
 
-- (void)HandlePrevColumn
+- (void)HandlePrevColumnWithEvent:(NSEvent *)_event
 {
     dispatch_assert_main_queue();
+
+    if( [m_ItemsView respondsToSelector:@selector(onMoveLeft:)] && [m_ItemsView onMoveLeft:_event] )
+        return;
 
     const auto orig_pos = m_CursorPos;
 
@@ -419,9 +422,12 @@ struct StateStorage {
     [self OnCursorPositionChanged];
 }
 
-- (void)HandleNextColumn
+- (void)HandleNextColumnWithEvent:(NSEvent *)_event
 {
     dispatch_assert_main_queue();
+
+    if( [m_ItemsView respondsToSelector:@selector(onMoveRight:)] && [m_ItemsView onMoveRight:_event] )
+        return;
 
     const auto orig_pos = m_CursorPos;
 
@@ -624,9 +630,9 @@ struct StateStorage {
     else if( event_action_tag_wo_shift == tags.down )
         [self HandleNextFile];
     else if( event_action_tag_wo_shift == tags.left )
-        [self HandlePrevColumn];
+        [self HandlePrevColumnWithEvent:event];
     else if( event_action_tag_wo_shift == tags.right )
-        [self HandleNextColumn];
+        [self HandleNextColumnWithEvent:event];
     else if( event_action_tag_wo_shift == tags.first )
         [self HandleFirstFile];
     else if( event_action_tag_wo_shift == tags.last )
