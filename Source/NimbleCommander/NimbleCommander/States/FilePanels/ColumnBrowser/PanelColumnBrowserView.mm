@@ -3,6 +3,7 @@
 #include "../PanelView.h"
 #include "../PanelControllerActionsDispatcher.h"
 #include "../Helpers/IconRepositoryCleaner.h"
+#include <Panel/PanelDataEntriesComparator.h>
 #include <NimbleCommander/Core/Theming/Theme.h>
 #include <NimbleCommander/Core/Theming/ThemesManager.h>
 #include <NimbleCommander/Bootstrap/AppDelegate.h>
@@ -371,12 +372,14 @@ static const NSInteger g_PreviewColumnTag = -2;
     auto host = listing.Host();
     std::string current_dir = m_Data->DirectoryPathWithTrailingSlash();
     bool show_hidden = m_Data->HardFiltering().show_hidden;
+    data::SortMode sort_mode = m_Data->SortMode();
 
     __weak NCPanelColumnBrowserView *weak_self = self;
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         auto ancestors = [NCPanelColumnBrowserView fetchAncestorsForDir:current_dir
                                                                    host:host
-                                                             showHidden:show_hidden];
+                                                             showHidden:show_hidden
+                                                               sortMode:sort_mode];
         dispatch_async(dispatch_get_main_queue(), ^{
             if( auto strong_self = weak_self ) {
                 strong_self->m_AncestorColumns = std::move(ancestors);
@@ -386,7 +389,7 @@ static const NSInteger g_PreviewColumnTag = -2;
     });
 }
 
-+ (void)buildSortedIndices:(AncestorColumn &)_col showHidden:(bool)_show_hidden
++ (void)buildSortedIndices:(AncestorColumn &)_col showHidden:(bool)_show_hidden sortMode:(data::SortMode)_sort_mode
 {
     const auto &listing = *_col.listing;
     const auto count = listing.Count();
@@ -399,17 +402,10 @@ static const NSInteger g_PreviewColumnTag = -2;
         _col.sorted_indices.push_back(i);
     }
 
-    // Sort: directories first, then alphabetically by name (case-insensitive)
-    std::sort(_col.sorted_indices.begin(), _col.sorted_indices.end(), [&listing](unsigned a, unsigned b) {
-        const bool a_dir = listing.IsDir(a);
-        const bool b_dir = listing.IsDir(b);
-        if( a_dir != b_dir )
-            return a_dir; // directories first
-
-        const auto &a_name = listing.Filename(a);
-        const auto &b_name = listing.Filename(b);
-        return strcasecmp(a_name.c_str(), b_name.c_str()) < 0;
-    });
+    // Use NC's real sort comparator with the panel's current sort mode
+    std::vector<data::ItemVolatileData> vd(count); // default-initialized (size = invalid_size)
+    data::IndirectListingComparator comp(listing, vd, _sort_mode);
+    std::sort(_col.sorted_indices.begin(), _col.sorted_indices.end(), comp);
 
     // Pre-compute highlighted row index
     _col.highlighted_row = -1;
@@ -426,6 +422,7 @@ static const NSInteger g_PreviewColumnTag = -2;
 + (std::vector<AncestorColumn>)fetchAncestorsForDir:(const std::string &)_current_dir
                                                 host:(const std::shared_ptr<VFSHost> &)_host
                                           showHidden:(bool)_show_hidden
+                                            sortMode:(data::SortMode)_sort_mode
 {
     std::vector<AncestorColumn> ancestors;
     std::string child_name;
@@ -463,7 +460,7 @@ static const NSInteger g_PreviewColumnTag = -2;
         col.listing = std::move(*result);
         col.path = parent_dir;
         col.highlighted_entry = child_name;
-        [self buildSortedIndices:col showHidden:_show_hidden];
+        [self buildSortedIndices:col showHidden:_show_hidden sortMode:_sort_mode];
         ancestors.push_back(std::move(col));
 
         // Prepare for next level up
@@ -831,6 +828,7 @@ static const NSInteger g_PreviewColumnTag = -2;
         dir_path += '/';
     auto host = item.Host();
     bool show_hidden = m_Data->HardFiltering().show_hidden;
+    data::SortMode sort_mode = m_Data->SortMode();
 
     // Create a new cancellation flag for this fetch
     auto cancel_flag = std::make_shared<std::atomic<bool>>(false);
@@ -860,14 +858,9 @@ static const NSInteger g_PreviewColumnTag = -2;
                 continue;
             preview.sorted_indices.push_back(i);
         }
-        std::sort(preview.sorted_indices.begin(), preview.sorted_indices.end(),
-                  [&listing](unsigned a, unsigned b) {
-                      const bool a_dir = listing.IsDir(a);
-                      const bool b_dir = listing.IsDir(b);
-                      if( a_dir != b_dir )
-                          return a_dir;
-                      return strcasecmp(listing.Filename(a).c_str(), listing.Filename(b).c_str()) < 0;
-                  });
+        std::vector<data::ItemVolatileData> vd(count);
+        data::IndirectListingComparator comp(listing, vd, sort_mode);
+        std::sort(preview.sorted_indices.begin(), preview.sorted_indices.end(), comp);
 
         if( cancel_flag->load() )
             return;
