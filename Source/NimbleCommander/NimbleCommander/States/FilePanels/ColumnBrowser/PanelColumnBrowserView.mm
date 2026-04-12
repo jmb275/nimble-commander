@@ -2,6 +2,7 @@
 #include "PanelColumnBrowserView.h"
 #include "../PanelView.h"
 #include "../PanelControllerActionsDispatcher.h"
+#include "../Helpers/IconRepositoryCleaner.h"
 #include <NimbleCommander/Core/Theming/Theme.h>
 #include <NimbleCommander/Core/Theming/ThemesManager.h>
 #include <NimbleCommander/Bootstrap/AppDelegate.h>
@@ -9,12 +10,15 @@
 #include <Panel/Log.h>
 #include <Utility/ObjCpp.h>
 #include <Utility/StringExtras.h>
+#include <ankerl/unordered_dense.h>
 #include <atomic>
 
 using namespace nc;
 using namespace nc::panel;
 
 static const CGFloat g_RowHeight = 20.0;
+static const CGFloat g_IconSize = 16.0;
+static const CGFloat g_IconInset = 2.0;
 static const CGFloat g_ColumnDividerWidth = 1.0;
 static NSString *const g_AncestorCellID = @"AncestorCell";
 static NSString *const g_ActiveCellID = @"ActiveCell";
@@ -89,6 +93,9 @@ static const NSInteger g_PreviewColumnTag = -2;
     std::optional<PreviewColumn> m_PreviewColumn;
     std::shared_ptr<std::atomic<bool>> m_PreviewCancelFlag;
 
+    // Icon slot → sorted item index mapping for the active column
+    ankerl::unordered_dense::map<vfsicon::IconRepository::SlotKey, int> m_IconSlotToItemIndex;
+
     bool m_PanelActive;
 }
 
@@ -133,6 +140,13 @@ static const NSInteger g_PreviewColumnTag = -2;
     // Create the active and preview column table views (not yet placed — rebuildColumns handles placement)
     [self createActiveColumn];
     [self createPreviewColumn];
+
+    // Set up icon update callback
+    __weak NCPanelColumnBrowserView *weak_self = self;
+    m_IconRepository->SetUpdateCallback([weak_self](vfsicon::IconRepository::SlotKey _slot, NSImage *_icon) {
+        if( auto strong_self = weak_self )
+            [strong_self onIconUpdated:_slot image:_icon];
+    });
 
     return self;
 }
@@ -502,6 +516,28 @@ static const NSInteger g_PreviewColumnTag = -2;
     }];
 }
 
+- (void)viewDidMoveToWindow
+{
+    [super viewDidMoveToWindow];
+    if( self.window ) {
+        const int physical_size = static_cast<int>(g_IconSize * self.window.backingScaleFactor);
+        m_IconRepository->SetPxSize(physical_size);
+    }
+}
+
+- (void)onIconUpdated:(vfsicon::IconRepository::SlotKey)_slot image:(NSImage *)_icon
+{
+    dispatch_assert_main_queue();
+    const auto it = m_IconSlotToItemIndex.find(_slot);
+    if( it == m_IconSlotToItemIndex.end() )
+        return;
+
+    const auto row = it->second;
+    NSView *cell = [m_ActiveColumnTableView viewAtColumn:0 row:row makeIfNecessary:NO];
+    if( auto *cell_view = nc::objc_cast<NSTableCellView>(cell) )
+        cell_view.imageView.image = _icon;
+}
+
 - (int)itemsInColumn
 {
     return 1;
@@ -547,7 +583,10 @@ static const NSInteger g_PreviewColumnTag = -2;
     dispatch_assert_main_queue();
     assert(m_Data);
 
-    // Reset preview to empty (column stays visible but blank until cursor triggers a new fetch)
+    // Clean up icon slots and reset preview
+    m_IconSlotToItemIndex.clear();
+    IconRepositoryCleaner{*m_IconRepository, *m_Data}.SweepUnusedSlots();
+
     if( m_PreviewCancelFlag )
         m_PreviewCancelFlag->store(true);
     m_PreviewColumn = PreviewColumn{};
@@ -667,6 +706,12 @@ static const NSInteger g_PreviewColumnTag = -2;
         cell = [[NSTableCellView alloc] initWithFrame:NSZeroRect];
         cell.identifier = cell_id;
 
+        NSImageView *iv = [[NSImageView alloc] initWithFrame:NSZeroRect];
+        iv.translatesAutoresizingMaskIntoConstraints = false;
+        iv.imageScaling = NSImageScaleProportionallyDown;
+        [cell addSubview:iv];
+        cell.imageView = iv;
+
         NSTextField *tf = [NSTextField labelWithString:@""];
         tf.translatesAutoresizingMaskIntoConstraints = false;
         tf.font = nc::CurrentTheme().FilePanelsBriefFont();
@@ -676,40 +721,64 @@ static const NSInteger g_PreviewColumnTag = -2;
         cell.textField = tf;
 
         [NSLayoutConstraint activateConstraints:@[
-            [tf.leadingAnchor constraintEqualToAnchor:cell.leadingAnchor constant:4],
-            [tf.trailingAnchor constraintEqualToAnchor:cell.trailingAnchor constant:-4],
+            [iv.leadingAnchor constraintEqualToAnchor:cell.leadingAnchor constant:g_IconInset],
+            [iv.centerYAnchor constraintEqualToAnchor:cell.centerYAnchor],
+            [iv.widthAnchor constraintEqualToConstant:g_IconSize],
+            [iv.heightAnchor constraintEqualToConstant:g_IconSize],
+            [tf.leadingAnchor constraintEqualToAnchor:iv.trailingAnchor constant:g_IconInset],
+            [tf.trailingAnchor constraintEqualToAnchor:cell.trailingAnchor constant:-2],
             [tf.centerYAnchor constraintEqualToAnchor:cell.centerYAnchor],
         ]];
     }
 
     NSString *filename = @"";
+    NSImage *icon = nil;
 
     if( tag == -1 && m_Data ) {
-        // Active column
-        if( VFSListingItem item = m_Data->EntryAtSortPosition(static_cast<int>(_row)) )
+        // Active column — use icon repository with VolatileData
+        const int row = static_cast<int>(_row);
+        if( VFSListingItem item = m_Data->EntryAtSortPosition(row) ) {
             filename = item.FilenameNS();
+
+            auto &vd = m_Data->VolatileDataAtSortPosition(row);
+            if( !m_IconRepository->IsValidSlot(vd.icon) )
+                vd.icon = m_IconRepository->Register(item);
+            if( m_IconRepository->IsValidSlot(vd.icon) ) {
+                icon = m_IconRepository->AvailableIconForSlot(vd.icon);
+                m_IconRepository->ScheduleIconProduction(vd.icon, item);
+                m_IconSlotToItemIndex[vd.icon] = row;
+            }
+            else {
+                icon = m_IconRepository->AvailableIconForListingItem(item);
+            }
+        }
     }
-    else if( tag == g_PreviewColumnTag && m_PreviewColumn ) {
-        // Preview column
+    else if( tag == g_PreviewColumnTag && m_PreviewColumn && m_PreviewColumn->listing ) {
+        // Preview column — just use generic icons (no repository tracking)
         if( static_cast<size_t>(_row) < m_PreviewColumn->sorted_indices.size() ) {
             const auto raw_idx = m_PreviewColumn->sorted_indices[static_cast<size_t>(_row)];
             filename = [NSString stringWithUTF8StdString:m_PreviewColumn->listing->Filename(raw_idx)];
+            icon = m_IconRepository->AvailableIconForListingItem(
+                m_PreviewColumn->listing->Item(raw_idx));
         }
     }
     else {
-        // Ancestor column
+        // Ancestor column — just use generic icons (no repository tracking)
         const auto idx = static_cast<size_t>(tag);
         if( idx < m_AncestorColumns.size() && m_AncestorColumns[idx].listing ) {
             const auto &col = m_AncestorColumns[idx];
             if( static_cast<size_t>(_row) < col.sorted_indices.size() ) {
                 const auto raw_idx = col.sorted_indices[static_cast<size_t>(_row)];
                 filename = [NSString stringWithUTF8StdString:col.listing->Filename(raw_idx)];
+                icon = m_IconRepository->AvailableIconForListingItem(
+                    col.listing->Item(raw_idx));
             }
         }
     }
 
     cell.textField.stringValue = filename;
     cell.textField.textColor = [NSColor labelColor];
+    cell.imageView.image = icon;
 
     return cell;
 }
