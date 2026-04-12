@@ -30,6 +30,7 @@
 #include <NimbleCommander/States/FilePanels/Views/QuickLookPanel.h>
 #include <NimbleCommander/States/FilePanels/Views/QuickLookVFSBridge.h>
 #include <NimbleCommander/States/FilePanels/Brief/PanelBriefView.h>
+#include <NimbleCommander/States/FilePanels/ColumnBrowser/PanelColumnBrowserView.h>
 #include <NimbleCommander/States/FilePanels/List/PanelListView.h>
 #include <NimbleCommander/States/FilePanels/Gallery/PanelGalleryView.h>
 #include <Operations/Pool.h>
@@ -162,6 +163,9 @@ static std::vector<std::string> CommaSeparatedStrings(const nc::config::Config &
     };
     presentation_factory.create_list_view = [](NSRect _rc, nc::vfsicon::IconRepository &_icon_repo) {
         return [[NCPanelListView alloc] initWithFrame:_rc iconRepository:_icon_repo];
+    };
+    presentation_factory.create_column_browser_view = [](NSRect _rc, nc::vfsicon::IconRepository &_icon_repo) {
+        return [[NCPanelColumnBrowserView alloc] initWithFrame:_rc iconRepository:_icon_repo];
     };
     presentation_factory.create_gallery_view = [](NSRect _rc, nc::vfsicon::IconRepository &_icon_repo) {
         return [[NCPanelGalleryView alloc] initWithFrame:_rc

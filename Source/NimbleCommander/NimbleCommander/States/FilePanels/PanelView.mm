@@ -11,6 +11,7 @@
 #include <Panel/Log.h>
 #include "PanelController.h"
 #include "Brief/PanelBriefView.h"
+#include "ColumnBrowser/PanelColumnBrowserView.h"
 #include "List/PanelListView.h"
 #include "Gallery/PanelGalleryView.h"
 #include "PanelViewHeader.h"
@@ -151,6 +152,11 @@ struct StateStorage {
         view.galleryLayout = *gallery_layout;
         return view;
     }
+    if( const PanelColumnBrowserLayout *col_browser_layout = _layout.columnBrowser() ) {
+        NCPanelColumnBrowserView *const view = [self spawnColumnBrowserView];
+        view.columnBrowserLayout = *col_browser_layout;
+        return view;
+    }
     return nil;
 }
 
@@ -205,6 +211,14 @@ struct StateStorage {
 - (NCPanelGalleryView *)spawnGalleryView
 {
     NCPanelGalleryView *const view = m_PresentationFactory.create_gallery_view(self.bounds, *m_IconRepository);
+    view.translatesAutoresizingMaskIntoConstraints = false;
+    return view;
+}
+
+- (NCPanelColumnBrowserView *)spawnColumnBrowserView
+{
+    NCPanelColumnBrowserView *const view =
+        m_PresentationFactory.create_column_browser_view(self.bounds, *m_IconRepository);
     view.translatesAutoresizingMaskIntoConstraints = false;
     return view;
 }
@@ -840,6 +854,39 @@ struct StateStorage {
     view.galleryLayout = _layout;
 }
 
+- (void)setupColumnBrowserPresentationWithLayout:(PanelColumnBrowserLayout)_layout
+{
+    NCPanelColumnBrowserView *view = nc::objc_cast<NCPanelColumnBrowserView>(m_ItemsView);
+    if( view == nil ) {
+        view = [self spawnColumnBrowserView];
+
+        [self replaceSubview:m_ItemsView with:view];
+        m_ItemsView = view;
+
+        NSDictionary *views = NSDictionaryOfVariableBindings(m_ItemsView, m_HeaderView, m_FooterView);
+        [self
+            addConstraints:[NSLayoutConstraint
+                               constraintsWithVisualFormat:@"V:[m_HeaderView]-(==0)-[m_ItemsView]-(==0)-[m_FooterView]"
+                                                   options:0
+                                                   metrics:nil
+                                                     views:views]];
+        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-(0)-[m_ItemsView]-(0)-|"
+                                                                     options:0
+                                                                     metrics:nil
+                                                                       views:views]];
+        [self layout];
+
+        if( m_Data ) {
+            m_ItemsView.data = m_Data;
+        }
+
+        if( m_CursorPos >= 0 )
+            [m_ItemsView setCursorPosition:m_CursorPos];
+    }
+
+    view.columnBrowserLayout = _layout;
+}
+
 - (nc::panel::PanelViewLayout::LayoutVariant)presentationLayout
 {
     if( auto v = nc::objc_cast<NCPanelBriefView>(m_ItemsView) )
@@ -848,6 +895,8 @@ struct StateStorage {
         return [v columnsLayout];
     if( auto v = nc::objc_cast<NCPanelGalleryView>(m_ItemsView) )
         return [v galleryLayout];
+    if( auto v = nc::objc_cast<NCPanelColumnBrowserView>(m_ItemsView) )
+        return [v columnBrowserLayout];
     return PanelViewDisabledLayout{};
 }
 
@@ -861,6 +910,9 @@ struct StateStorage {
     }
     else if( const PanelGalleryViewLayout *gallery_layout = _layout.gallery() ) {
         [self setupGalleryPresentationWithLayout:*gallery_layout];
+    }
+    else if( const PanelColumnBrowserLayout *col_browser_layout = _layout.columnBrowser() ) {
+        [self setupColumnBrowserPresentationWithLayout:*col_browser_layout];
     }
 }
 

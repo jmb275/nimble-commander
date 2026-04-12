@@ -17,6 +17,7 @@
 @class NCPanelViewHeader;
 @class NCPanelViewFooter;
 @class NCPanelBriefView;
+@class NCPanelColumnBrowserView;
 @class NCPanelGalleryView;
 @class NCPanelListView;
 
@@ -36,6 +37,7 @@ class Model;
 
 struct PresentationFactory {
     std::function<NCPanelBriefView *(NSRect, nc::vfsicon::IconRepository &)> create_brief_view;
+    std::function<NCPanelColumnBrowserView *(NSRect, nc::vfsicon::IconRepository &)> create_column_browser_view;
     std::function<NCPanelListView *(NSRect, nc::vfsicon::IconRepository &)> create_list_view;
     std::function<NCPanelGalleryView *(NSRect, nc::vfsicon::IconRepository &)> create_gallery_view;
 };

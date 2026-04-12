@@ -3,6 +3,7 @@
 
 #include <Base/Observable.h>
 #include "Brief/Layout.h"
+#include "ColumnBrowser/Layout.h"
 #include "Gallery/Layout.h"
 #include "List/Layout.h"
 #include <any>
@@ -24,13 +25,15 @@ struct PanelViewLayout {
         Disabled = 0,
         Brief = 1,
         List = 2,
-        Gallery = 3
+        Gallery = 3,
+        ColumnBrowser = 4
     };
 
     using LayoutVariant = std::variant<PanelViewDisabledLayout,
                                        PanelBriefViewColumnsLayout,
                                        PanelListViewColumnsLayout,
-                                       PanelGalleryViewLayout>;
+                                       PanelGalleryViewLayout,
+                                       PanelColumnBrowserLayout>;
 
     // Returns true if this layout is disabled (PanelViewDisabledLayout).
     [[nodiscard]] bool is_disabled() const noexcept;
@@ -46,6 +49,9 @@ struct PanelViewLayout {
 
     // Returns a Gallery layout configuration if this layout is stored, otherwise nullptr
     [[nodiscard]] const PanelGalleryViewLayout *gallery() const noexcept;
+
+    // Returns a ColumnBrowser layout configuration if this layout is stored, otherwise nullptr
+    [[nodiscard]] const PanelColumnBrowserLayout *columnBrowser() const noexcept;
 
     // Equality operator
     bool operator==(const PanelViewLayout &) const noexcept;

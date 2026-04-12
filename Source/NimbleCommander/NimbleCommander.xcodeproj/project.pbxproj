@@ -395,6 +395,9 @@
 		CFF835F92DC9504A00CED300 /* PanelGalleryCollectionViewItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = CFF835F72DC9504A00CED300 /* PanelGalleryCollectionViewItem.mm */; };
 		CFF836B92DCFE98B00CED300 /* PanelGalleryCollectionView.mm in Sources */ = {isa = PBXBuildFile; fileRef = CFF836B82DCFE98B00CED300 /* PanelGalleryCollectionView.mm */; };
 		CFF836BA2DCFE98B00CED300 /* PanelGalleryCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = CFF836B72DCFE98B00CED300 /* PanelGalleryCollectionView.h */; };
+		1F1C3568AF3D4DCC83CE3ADF /* Layout.h in Headers */ = {isa = PBXBuildFile; fileRef = 300AF810234D48339E81CA3B /* Layout.h */; };
+		E990B92B76114589BA792EB3 /* PanelColumnBrowserView.h in Headers */ = {isa = PBXBuildFile; fileRef = 911F8CB3F5F242F98D5B4DB5 /* PanelColumnBrowserView.h */; };
+		10A2DE9E8F55461E96579BEA /* PanelColumnBrowserView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8F3D773691ED40FE94CF87F6 /* PanelColumnBrowserView.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -963,6 +966,9 @@
 		CF3E6DF71E3870AB002B4AAD /* PanelViewPresentationSettings.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = PanelViewPresentationSettings.mm; path = NimbleCommander/States/FilePanels/PanelViewPresentationSettings.mm; sourceTree = SOURCE_ROOT; };
 		CF3FC99C2D99502900878079 /* Layout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Layout.h; path = NimbleCommander/States/FilePanels/Gallery/Layout.h; sourceTree = SOURCE_ROOT; };
 		CF3FC99D2D99502900878079 /* Layout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Layout.cpp; path = NimbleCommander/States/FilePanels/Gallery/Layout.cpp; sourceTree = SOURCE_ROOT; };
+		300AF810234D48339E81CA3B /* Layout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Layout.h; path = NimbleCommander/States/FilePanels/ColumnBrowser/Layout.h; sourceTree = SOURCE_ROOT; };
+		911F8CB3F5F242F98D5B4DB5 /* PanelColumnBrowserView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PanelColumnBrowserView.h; path = NimbleCommander/States/FilePanels/ColumnBrowser/PanelColumnBrowserView.h; sourceTree = "<group>"; };
+		8F3D773691ED40FE94CF87F6 /* PanelColumnBrowserView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = PanelColumnBrowserView.mm; path = NimbleCommander/States/FilePanels/ColumnBrowser/PanelColumnBrowserView.mm; sourceTree = "<group>"; };
 		CF41351E1F890709007429B6 /* SettingsAdaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SettingsAdaptor.h; path = NimbleCommander/States/Terminal/SettingsAdaptor.h; sourceTree = SOURCE_ROOT; };
 		CF41351F1F890709007429B6 /* SettingsAdaptor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SettingsAdaptor.mm; path = NimbleCommander/States/Terminal/SettingsAdaptor.mm; sourceTree = SOURCE_ROOT; };
 		CF44D329202D63100083FAF5 /* ExecuteExternalTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExecuteExternalTool.h; path = NimbleCommander/States/FilePanels/Actions/ExecuteExternalTool.h; sourceTree = SOURCE_ROOT; };
@@ -1453,6 +1459,7 @@
 			isa = PBXGroup;
 			children = (
 				CF5D25E31DB604060073156F /* Brief */,
+				0D72AE2239B945BBA74D7605 /* ColumnBrowser */,
 				CF84C8EF1DBB2AA900B4E888 /* List */,
 				CF3FC99B2D994FC100878079 /* Gallery */,
 				CF7D7D5A21576E0100DA1794 /* PanelViewDummyPresentation.h */,
@@ -1671,6 +1678,16 @@
 				CFF8353D2DC8D1B400CED300 /* PanelGalleryView.mm */,
 			);
 			name = Gallery;
+			sourceTree = "<group>";
+		};
+		0D72AE2239B945BBA74D7605 /* ColumnBrowser */ = {
+			isa = PBXGroup;
+			children = (
+				300AF810234D48339E81CA3B /* Layout.h */,
+				911F8CB3F5F242F98D5B4DB5 /* PanelColumnBrowserView.h */,
+				8F3D773691ED40FE94CF87F6 /* PanelColumnBrowserView.mm */,
+			);
+			name = ColumnBrowser;
 			sourceTree = "<group>";
 		};
 		CF536C0D16C92EA200F37203 /* FilePanels */ = {
@@ -2296,6 +2313,8 @@
 				CFCBA8BB2CC3B1B4009ABD2C /* ShowContextMenu.h in Headers */,
 				CFCF44012BA2418100B513C7 /* ConfigBinder.h in Headers */,
 				CFF835F82DC9504A00CED300 /* PanelGalleryCollectionViewItem.h in Headers */,
+				1F1C3568AF3D4DCC83CE3ADF /* Layout.h in Headers */,
+				E990B92B76114589BA792EB3 /* PanelColumnBrowserView.h in Headers */,
 				CF669D662EF01757001B7FA5 /* PanelGalleryCentralView.h in Headers */,
 				CFEADD49259CF60D009ECA14 /* ChangePanelsPosition.h in Headers */,
 				CFEADD54259D01AD009ECA14 /* FocusOverlappedTerminal.h in Headers */,
@@ -3130,6 +3149,7 @@
 				CF0A48152BDD9FFE00833160 /* ExternalEditorInfo.mm in Sources */,
 				CF0A48772BDDA50800833160 /* FilePanelOverlappedTerminal.mm in Sources */,
 				CFF835F92DC9504A00CED300 /* PanelGalleryCollectionViewItem.mm in Sources */,
+				10A2DE9E8F55461E96579BEA /* PanelColumnBrowserView.mm in Sources */,
 				CF0A48812BDDA54F00833160 /* QuickLookOverlay.mm in Sources */,
 				CF0A485A2BDDA3A000833160 /* PanelBriefViewCollectionView.mm in Sources */,
 				CF0A47FB2BDD9E9F00833160 /* ConfigWiring.mm in Sources */,

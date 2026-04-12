@@ -33,6 +33,11 @@ const PanelListViewColumnsLayout *PanelViewLayout::list() const noexcept
     return std::get_if<PanelListViewColumnsLayout>(&layout);
 }
 
+const PanelColumnBrowserLayout *PanelViewLayout::columnBrowser() const noexcept
+{
+    return std::get_if<PanelColumnBrowserLayout>(&layout);
+}
+
 bool PanelViewLayout::operator==(const PanelViewLayout &_rhs) const noexcept = default;
 
 static const auto g_TitleKey = "title";
@@ -54,6 +59,9 @@ static const auto g_ListIconScale = "icon_scale";
 static const auto g_GalleryKey = "gallery";
 static const auto g_GalleryIconScale = "icon_scale";
 static const auto g_GalleryTextLines = "text_lines";
+static const auto g_ColumnBrowserKey = "column_browser";
+static const auto g_ColumnBrowserColumnWidth = "column_width";
+static const auto g_ColumnBrowserShowIcons = "show_icons";
 static const auto g_DisabledKey = "disabled";
 
 static config::Value SaveLayout(const PanelViewLayout &_l)
@@ -104,6 +112,14 @@ static config::Value SaveLayout(const PanelViewLayout &_l)
         d.AddMember(MakeStandaloneString(g_GalleryIconScale), config::Value(gallery->icon_scale), g_CrtAllocator);
         d.AddMember(MakeStandaloneString(g_GalleryTextLines), config::Value(gallery->text_lines), g_CrtAllocator);
         v.AddMember(MakeStandaloneString(g_GalleryKey), std::move(d), g_CrtAllocator);
+    }
+    else if( auto col_browser = _l.columnBrowser() ) {
+        config::Value d{kObjectType};
+        d.AddMember(
+            MakeStandaloneString(g_ColumnBrowserColumnWidth), config::Value(col_browser->column_width), g_CrtAllocator);
+        d.AddMember(
+            MakeStandaloneString(g_ColumnBrowserShowIcons), config::Value(col_browser->show_icons), g_CrtAllocator);
+        v.AddMember(MakeStandaloneString(g_ColumnBrowserKey), std::move(d), g_CrtAllocator);
     }
     else if( _l.is_disabled() ) {
         v.AddMember(MakeStandaloneString(g_DisabledKey), config::Value{kNullType}, g_CrtAllocator);
@@ -174,6 +190,15 @@ static std::optional<PanelViewLayout> LoadLayout(const config::Value &_from)
         if( o.HasMember(g_GalleryTextLines) && o[g_GalleryTextLines].IsInt() )
             gallery.text_lines = static_cast<uint8_t>(o[g_GalleryTextLines].GetInt());
         l.layout = gallery;
+    }
+    else if( _from.HasMember(g_ColumnBrowserKey) && _from[g_ColumnBrowserKey].IsObject() ) {
+        auto &o = _from[g_ColumnBrowserKey];
+        PanelColumnBrowserLayout col_browser;
+        if( o.HasMember(g_ColumnBrowserColumnWidth) && o[g_ColumnBrowserColumnWidth].IsInt() )
+            col_browser.column_width = static_cast<short>(o[g_ColumnBrowserColumnWidth].GetInt());
+        if( o.HasMember(g_ColumnBrowserShowIcons) && o[g_ColumnBrowserShowIcons].IsBool() )
+            col_browser.show_icons = o[g_ColumnBrowserShowIcons].GetBool();
+        l.layout = col_browser;
     }
     else if( _from.HasMember(g_DisabledKey) )
         l.layout = PanelViewDisabledLayout{};
