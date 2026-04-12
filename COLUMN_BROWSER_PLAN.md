@@ -217,6 +217,7 @@ Add new files to the Xcode project / CMake build target.
 - [ ] **Horizontal scroll gesture**: Nested NSScrollViews prevent trackpad horizontal scroll from reaching the outer container. Need custom scroll event forwarding or a different container approach.
 - [ ] **File icons in all columns**: No icons yet in any column.
 - [ ] **NC theme color matching**: Selection highlight uses system blue/grey rather than NC's theme-specific colors (FilePanelsBriefFocusedActive/InactiveItemBackgroundColor).
+- [ ] **Auto-fit column widths**: Size columns to fit their longest filename (like Finder's recent addition). Could be on-demand (double-click divider) or automatic.
 
 ## Risks
 

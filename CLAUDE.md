@@ -45,7 +45,10 @@ See `COLUMN_BROWSER_PLAN.md` for full architecture and phased implementation pla
 - `Source/NimbleCommander/.../ColumnBrowser/Layout.h` — layout config struct
 - `Source/NimbleCommander/.../PanelViewImplementationProtocol.h` — added onMoveLeft:/onMoveRight:
 - `Source/NimbleCommander/.../PanelView.mm` — arrow key dispatch guards
-- User config: `~/Library/Application Support/Nimble Commander/Config/Config.json` (layout slot 6)
+- User config (unsigned build): `~/Library/Application Support/NimbleCommander-Unsigned/Config/Config.json`
+- User config (official NC): `~/Library/Application Support/Nimble Commander/Config/Config.json`
+- The two installs use separate configs (based on CFBundleExecutable name), so they can coexist
+- **Warning**: Don't edit the column browser layout in NC's Settings > Panels > Layout UI — it doesn't know about the `column_browser` type and will overwrite it with a Brief layout
 
 ## Pulling Upstream Updates
 
