@@ -77,13 +77,36 @@ Source provenance and SHA-256 are recorded in the manifest.
 ## Keyboard Maestro
 
 The `NimbleCommander` macro group must include **Nimble Commander Personal**
-in its application list. The `NC: Go to Dropbox` shell action targets its stable ID:
+in its application list. `NC: Go to Dropbox` (Command-Shift-H) uses one active
+**Select or Show a Menu Item** action targeting **Nimble Commander Personal**:
+**Go > Favorites > Dropbox**. The Dropbox favorite comes from the saved config.
+This navigates the current tab; Alfred Command-Enter continues to create a new tab.
+The macro was run twice in a disposable tab on 2026-10-31 and did not add tabs.
 
-```sh
-open -b com.jbradley.nimblecommander.personal "$HOME/Dropbox"
-```
+Do not use `open` for this shortcut: it sends an external request and obeys the
+new-tab preference. The previous shell action remains disabled for reference.
+A portable export containing the corrected action and hotkey is saved at
+`6_computing/apps/keyboardmaestro/nc_go_to_dropbox.kmmacros` for import on the MBA
+if Keyboard Maestro does not already sync the change.
 
-The old `open -a "Nimble Commander"` command launches the stock app.
+## Accessibility prompt after an update
+
+The saved `general.alwaysUseFnKeysAsFunctional` setting is enabled. At launch,
+NC's function-key remapper calls `AXIsProcessTrustedWithOptions` with prompting
+on. This is separate from folder-access permission and requires Accessibility
+permission for **Nimble Commander Personal**, even if stock NC already has it.
+
+If the popup repeats despite the Accessibility switch appearing on, the grant
+may refer to a previous ad-hoc build. Quit Personal NC; in System Settings >
+Privacy & Security > Accessibility, remove only **Nimble Commander Personal**,
+then add `~/Applications/Nimble Commander Personal.app` and enable it. Reopen NC
+and check another launch. Re-adding the app is a user-performed permission change;
+the installer does not grant or reset it. Do not rebuild/re-sign the app just
+to troubleshoot this, because that changes its ad-hoc identity again.
+
+The permission refresh still needs live confirmation. Disabling function-key
+remapping would also avoid this request but would change the saved key behavior;
+it has not been disabled.
 
 ## Installer verification
 
