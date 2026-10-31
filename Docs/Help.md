@@ -360,6 +360,12 @@ This screenshot shows a `Volumes` Quick List:
 ![Quick List](Help-panel-quicklist.png)
 
 ## Tabs
+
+To preserve your current tabs when another application opens a folder or reveals a file in Nimble Commander,
+enable `Settings > General > Open external requests in a new tab`.
+These requests create and activate a new tab on the active pane, including when a window must first be opened.
+This option is off by default; when off, external requests navigate the current tab.
+
 File panels support a tabbed interface, allowing multiple locations to be opened simultaneously on either the left or right pane.
 The tab bar appears automatically if more than one tab is open in a pane, but it can also be forced to always show via the menu `View > Show Tab Bar` or by using the hotkey `Cmd + Shift + T`.
 The screenshot below shows Nimble Commander's window with two tabs in the left pane and three tabs in the right pane:

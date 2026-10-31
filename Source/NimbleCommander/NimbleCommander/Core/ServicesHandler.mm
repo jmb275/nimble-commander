@@ -2,16 +2,43 @@
 #include "ServicesHandler.h"
 #include <NimbleCommander/States/MainWindowController.h>
 #include <NimbleCommander/States/FilePanels/MainWindowFilePanelState.h>
+#include <NimbleCommander/States/FilePanels/MainWindowFilePanelState+TabsSupport.h>
 #include <NimbleCommander/States/FilePanels/PanelController.h>
+#include <NimbleCommander/States/FilePanels/Views/FilePanelsTabbedHolder.h>
+#include <Config/Config.h>
 #include <Utility/StringExtras.h>
 
 namespace nc::core {
 
-ServicesHandler::ServicesHandler(std::function<NCMainWindowController *()> _window_provider, VFSHostPtr _native_host)
-    : m_WindowProvider(std::move(_window_provider)), m_NativeHost(std::move(_native_host))
+ServicesHandler::ServicesHandler(std::function<NCMainWindowController *()> _window_provider,
+                                 VFSHostPtr _native_host,
+                                 config::Config &_config)
+    : m_WindowProvider(std::move(_window_provider)), m_NativeHost(std::move(_native_host)), m_Config(_config)
 {
     assert(m_WindowProvider);
     assert(m_NativeHost && m_NativeHost->IsNativeFS());
+}
+
+PanelController *ServicesHandler::PanelForExternalRequest()
+{
+    const auto window = m_WindowProvider();
+    if( !window )
+        return nil;
+
+    const auto state = window.filePanelsState;
+    const auto current = state.activePanelController;
+    if( !current || !m_Config.GetBool("filePanel.general.openExternalRequestsInNewTab") )
+        return current;
+
+    NSTabView *tab_view = nil;
+    if( current == state.leftPanelController )
+        tab_view = state.leftTabbedHolder.tabView;
+    else if( current == state.rightPanelController )
+        tab_view = state.rightTabbedHolder.tabView;
+    if( !tab_view )
+        return nil;
+
+    return [state spawnNewTabInTabView:tab_view autoDirectoryLoading:false activateNewPanel:true];
 }
 
 static NSURL *ExtractFirstURL(NSPasteboard *_pboard)
@@ -41,12 +68,12 @@ void ServicesHandler::OpenFolder(NSPasteboard *_pboard,
 
 void ServicesHandler::GoToFolder(const std::string &_path)
 {
-    if( const auto wnd = m_WindowProvider() ) {
+    if( const auto panel = PanelForExternalRequest() ) {
         const auto ctx = std::make_shared<panel::DirectoryChangeRequest>();
         ctx->RequestedDirectory = _path;
         ctx->VFS = m_NativeHost;
         ctx->InitiatedByUser = true;
-        [wnd.filePanelsState.activePanelController GoToDirWithContext:ctx];
+        [panel GoToDirWithContext:ctx];
     }
 }
 
@@ -118,7 +145,7 @@ void ServicesHandler::RevealItems(const std::vector<std::string> &_paths)
     if( directory.empty() || filenames.empty() )
         return;
 
-    if( const auto wnd = m_WindowProvider() ) {
+    if( const auto panel = PanelForExternalRequest() ) {
         const auto ctx = std::make_shared<panel::DirectoryChangeRequest>();
         ctx->RequestedDirectory = directory;
         ctx->VFS = m_NativeHost;
@@ -126,7 +153,7 @@ void ServicesHandler::RevealItems(const std::vector<std::string> &_paths)
         if( filenames.size() > 1 )
             ctx->RequestSelectedEntries = filenames;
         ctx->InitiatedByUser = true;
-        [wnd.filePanelsState.activePanelController GoToDirWithContext:ctx];
+        [panel GoToDirWithContext:ctx];
     }
 }
 

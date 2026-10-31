@@ -47,6 +47,11 @@
              * When creating a first window, should app restore the last state
              */
             "restoreLastWindowState": true,
+
+            /**
+             * Open folders and reveal items requested by other applications in a new tab.
+             */
+            "openExternalRequestsInNewTab": false,
             
             /**
              * Initial path for left panel

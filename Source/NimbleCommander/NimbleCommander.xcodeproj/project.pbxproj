@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		256FA7674405415A95D43D94 /* ServicesHandler_UT.mm in Sources */ = {isa = PBXBuildFile; fileRef = C90116E988634F3AB9454FD4 /* ServicesHandler_UT.mm */; };
 		A1B2C3D40000000000000051 /* UtilityResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000050 /* UtilityResources.bundle */; };
 		A1B2C3D40000000000000052 /* UtilityResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000050 /* UtilityResources.bundle */; };
 		A1B2C3D40000000000000053 /* UtilityResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000050 /* UtilityResources.bundle */; };
@@ -869,6 +870,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C90116E988634F3AB9454FD4 /* ServicesHandler_UT.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = ServicesHandler_UT.mm; path = NimbleCommander/Tests/ServicesHandler_UT.mm; sourceTree = "<group>"; };
 		CF0139AD1E99DAC100E44F2D /* ToggleSort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ToggleSort.h; path = NimbleCommander/States/FilePanels/Actions/ToggleSort.h; sourceTree = SOURCE_ROOT; };
 		CF0139AE1E99DAC100E44F2D /* ToggleSort.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ToggleSort.mm; path = NimbleCommander/States/FilePanels/Actions/ToggleSort.mm; sourceTree = SOURCE_ROOT; };
 		CF0139B01E99EC4A00E44F2D /* DefaultAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DefaultAction.h; path = NimbleCommander/States/FilePanels/Actions/DefaultAction.h; sourceTree = SOURCE_ROOT; };
@@ -1730,6 +1732,7 @@
 			children = (
 				CF371DA92D18472E0034EB3F /* ActionsShortcutsManager_UT.cpp */,
 				CF764CE62587661300D7ED17 /* DragSender_UT.mm */,
+				C90116E988634F3AB9454FD4 /* ServicesHandler_UT.mm */,
 				CF764D422587837200D7ED17 /* PanelBriefViewDynamicWidthLayoutEngine_UT.mm */,
 				CF764D4E258785CC00D7ED17 /* PanelBriefViewFixedNumberLayoutEngine_UT.mm */,
 				CF764D562587875E00D7ED17 /* PanelBriefViewFixedWidthLayoutEngine_UT.mm */,
@@ -3231,6 +3234,7 @@
 				CFD2D27B28A03DC5003C18F9 /* ThemesManager_UT.mm in Sources */,
 				CF764D432587837200D7ED17 /* PanelBriefViewDynamicWidthLayoutEngine_UT.mm in Sources */,
 				CF764CE72587661300D7ED17 /* DragSender_UT.mm in Sources */,
+				256FA7674405415A95D43D94 /* ServicesHandler_UT.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -67,8 +67,22 @@
                         <action selector="OnFSAccessReset:" target="-2" id="qcr-xq-bMK"/>
                     </connections>
                 </button>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="rEv-eaL-TaB">
+                    <rect key="frame" x="321" y="35" width="285" height="18"/>
+                    <buttonCell key="cell" type="check" title="Open external requests in a new tab" bezelStyle="regularSquare" imagePosition="left" inset="2" id="rEv-eaL-Cel">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="-3" name="value" keyPath="delegate.config.filePanel.general.openExternalRequestsInNewTab" id="rEv-eaL-Bnd"/>
+                    </connections>
+                </button>
             </subviews>
             <constraints>
+                <constraint firstItem="rEv-eaL-TaB" firstAttribute="leading" secondItem="8tk-ZS-HXz" secondAttribute="leading" id="rEv-eaL-Lft"/>
+                <constraint firstItem="rEv-eaL-TaB" firstAttribute="top" secondItem="8tk-ZS-HXz" secondAttribute="bottom" constant="16" id="rEv-eaL-Top"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="rEv-eaL-TaB" secondAttribute="trailing" constant="20" id="rEv-eaL-Rgt"/>
+                <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="rEv-eaL-TaB" secondAttribute="bottom" constant="20" id="rEv-eaL-Btm"/>
                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="30" secondAttribute="trailing" constant="20" symbolic="YES" id="7El-SZ-fOn"/>
                 <constraint firstItem="mE6-dr-OKl" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="20" symbolic="YES" id="7nT-fX-tJv"/>
                 <constraint firstItem="mE6-dr-OKl" firstAttribute="baseline" secondItem="8tk-ZS-HXz" secondAttribute="baseline" id="DWR-Gx-qRV"/>

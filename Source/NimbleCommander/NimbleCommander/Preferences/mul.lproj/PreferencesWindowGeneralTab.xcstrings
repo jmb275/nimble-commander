@@ -1,6 +1,18 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "rEv-eaL-Cel.title" : {
+      "comment" : "Class = \"NSButtonCell\"; title = \"Open external requests in a new tab\"; ObjectID = \"rEv-eaL-Cel\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open external requests in a new tab"
+          }
+        }
+      }
+    },
     "31.title" : {
       "comment" : "Class = \"NSButtonCell\"; title = \"Reset to defaults\"; ObjectID = \"31\";",
       "extractionState" : "extracted_with_value",

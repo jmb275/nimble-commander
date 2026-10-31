@@ -835,7 +835,7 @@ static NCAppDelegate *g_Me = nil;
 - (nc::core::ServicesHandler &)servicesHandler
 {
     auto window_locator = [] { return [g_Me windowForExternalRevealRequest]; };
-    [[clang::no_destroy]] static nc::core::ServicesHandler handler(window_locator, self.nativeHostPtr);
+    [[clang::no_destroy]] static nc::core::ServicesHandler handler(window_locator, self.nativeHostPtr, GlobalConfig());
     return handler;
 }
 

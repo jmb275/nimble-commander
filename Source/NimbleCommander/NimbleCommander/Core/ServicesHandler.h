@@ -9,13 +9,20 @@
 #include <VFS/Native.h>
 
 @class NCMainWindowController;
+@class PanelController;
+
+namespace nc::config {
+class Config;
+}
 
 namespace nc::core {
 
 class ServicesHandler
 {
 public:
-    ServicesHandler(std::function<NCMainWindowController *()> _window_provider, VFSHostPtr _native_host);
+    ServicesHandler(std::function<NCMainWindowController *()> _window_provider,
+                    VFSHostPtr _native_host,
+                    config::Config &_config);
 
     // NSService
     void OpenFolder(NSPasteboard *_pboard, NSString *_user_data, __strong NSString **_error);
@@ -25,11 +32,13 @@ public:
     void OpenFiles(NSArray<NSString *> *_paths);
 
 private:
+    PanelController *PanelForExternalRequest();
     void GoToFolder(const std::string &_path);
     void RevealItems(const std::vector<std::string> &_paths);
 
     std::function<NCMainWindowController *()> m_WindowProvider;
     VFSHostPtr m_NativeHost;
+    config::Config &m_Config;
 };
 
 } // namespace nc::core
