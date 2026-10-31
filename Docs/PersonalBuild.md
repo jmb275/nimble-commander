@@ -22,7 +22,14 @@ command as part of this installation.
 Your saved themes, layouts, hotkeys, tools, and editors are reused. Window/tab state
 and security permissions are separate from configuration and are not migrated.
 Because this is a distinct app identity, macOS may ask for permissions again.
-This is a locally built unsigned app, without Developer ID notarization.
+The complete app and its bundled helpers are sealed with local ad-hoc signatures;
+it has no Developer ID signature or notarization. The original package omitted
+this sealing step, which can prevent macOS from remembering folder-access grants.
+After installing the corrected package, allow requested folders once and check
+that revisiting them no longer prompts. Ad-hoc identity changes with the code,
+so permissions may need approval again after a future rebuild. A persistent
+certificate-based signing identity would be needed to preserve identity across
+updates. See [Apple's code identity explanation](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements).
 
 The same package works on every architecture listed in `manifest.json`; the MBA
 needs uv, not Xcode. Installation is per-Mac. Preferences remain shared through Dropbox.
@@ -57,11 +64,28 @@ uv run --script Scripts/build_personal.py
 
 The builder uses the Release unsigned scheme, creates the distinct personal app
 identity and executable, and disables automatic upstream update checks/downloads
-through Sparkle's documented Info.plist settings. Do not use the app's built-in
+through Sparkle's documented Info.plist settings. After all changes, it signs
+unsigned or modified nested bundles inside out, preserves valid vendor signatures,
+and seals the outer app using its personal bundle ID. Deep, strict signature
+verification covers both CPU architectures before packaging and installation.
+No certificate, private key, or keychain access is needed. Do not use the app's built-in
 Check for Updates to update this fork; rebuild it from source instead.
 The generated archive, manifest, installer, and license are copied to
 `6_computing/apps/nimble_commander_personal` for Dropbox distribution.
 Source provenance and SHA-256 are recorded in the manifest.
+
+## Keyboard Maestro
+
+The `NimbleCommander` macro group must include **Nimble Commander Personal**
+in its application list. The `NC: Go to Dropbox` shell action targets its stable ID:
+
+```sh
+open -b com.jbradley.nimblecommander.personal "$HOME/Dropbox"
+```
+
+The old `open -a "Nimble Commander"` command launches the stock app.
+
+## Installer verification
 
 Test installer transactions without changing real apps or preferences:
 

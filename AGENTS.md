@@ -7,6 +7,7 @@ Read `CONTRIBUTING.md` and `Docs/Building.md` before source changes.
 - `archive/column-browser` preserves Justin's old column-browser work. Do not merge it into either reveal branch.
 - Personal distribution and installer usage: `Docs/PersonalBuild.md`.
 - Build with `NimbleCommander-Unsigned` and `CODE_SIGNING_ALLOWED=NO`; agent sessions cannot use signing credentials.
+- Personal packaging seals nested bundles and the outer app with ad-hoc signatures after all edits; verify deeply/strictly on all architectures. Ad-hoc signing needs no credentials and is distinct from Developer ID signing. Do not ship linker-only signatures.
 - Application tests: build the `NimbleCommanderUT` scheme, then run the resulting executable directly.
 - The reveal change has regression tests in `ServicesHandler_UT.mm`. Live Alfred acceptance was verified on 2026-10-30.
 - Test app registration from `/private/tmp` failed. Install distinct app identities in `~/Applications` before configuring file-viewer defaults.

@@ -29,7 +29,7 @@ with tempfile.TemporaryDirectory(prefix='nc_personal_installer_',dir='/private/t
     config.write_text('original personal config')
     values={'-g':'info.filesmanager.Files',m.ALFRED:m.TEST_ID}
     legacy_receipt=root/'legacy_test_before'; legacy_receipt.write_text(m.ABSENT); m.LEGACY_TEST_RECEIPT=legacy_receipt
-    history=[]; fail_alfred_write=[False]
+    history=[]; fail_alfred_write=[False]; fail_signature=[False]
     def read(domain): return values[domain]
     def write(domain,value):
         history.append(('write',domain,value))
@@ -39,6 +39,8 @@ with tempfile.TemporaryDirectory(prefix='nc_personal_installer_',dir='/private/t
         values[domain]=value
     def command(*args,check=True):
         history.append(tuple(map(str,args)))
+        if str(args[0])=='/usr/bin/codesign' and fail_signature[0]:
+            raise subprocess.CalledProcessError(1,args,stderr='invalid fixture signature')
         if str(args[0])=='/usr/bin/ditto':
             return subprocess.run(list(map(str,args)),capture_output=True,text=True,check=check)
         if str(args[0])=='/usr/bin/pgrep': return subprocess.CompletedProcess(args,1,'','')
@@ -54,7 +56,14 @@ with tempfile.TemporaryDirectory(prefix='nc_personal_installer_',dir='/private/t
         first_history=len(history); m.install(package,user_root); assert len(history)==first_history
         before=json.loads((support/'Installer/before_personal.json').read_text())
         assert before=={'global':'info.filesmanager.Files','alfred':m.ABSENT}
-        make_package(package,'2'*40); m.install(package,user_root)
+        make_package(package,'2'*40); fail_signature[0]=True
+        try: m.install(package,user_root)
+        except subprocess.CalledProcessError as error: assert 'signature' in error.stderr
+        else: raise AssertionError('accepted invalid signature')
+        assert plistlib.loads((app/'Contents/Info.plist').read_bytes())['NCSourceCommit']=='1'*40
+        assert not list((support/'Installer').glob('app_before_*.zip'))
+        assert config.is_symlink() and all(value==m.BUNDLE_ID for value in values.values())
+        fail_signature[0]=False; m.install(package,user_root)
         assert len(list((support/'Installer').glob('app_before_*.zip')))==1
         assert json.loads((support/'Installer/before_personal.json').read_text())==before
         assert plistlib.loads((app/'Contents/Info.plist').read_bytes())['NCSourceCommit']=='2'*40
@@ -72,4 +81,4 @@ with tempfile.TemporaryDirectory(prefix='nc_personal_installer_',dir='/private/t
         try: m.install(package,user_root)
         except RuntimeError as error: assert 'checksum' in str(error)
         else: raise AssertionError('accepted corrupt archive')
-    print('PASS: package validation, saved-config linking, unchanged canonical prefs, first install, no-op repeat, update backup, partial-failure rollback, and guarded restore. No real apps or defaults changed.')
+    print('PASS: package validation, saved-config linking, unchanged canonical prefs, first install, no-op repeat, signature rejection before replacement, update backup, partial-failure rollback, and guarded restore. No real apps or defaults changed.')

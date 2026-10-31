@@ -41,6 +41,26 @@ def architectures(app):
     return sorted(common)
 
 
+def seal_app(app):
+    """Seal modified/unsigned nested bundles inside out, then the finished app.
+
+    Ad-hoc signing uses no certificate or keychain. Keep valid vendor signatures.
+    Never use --deep when signing: it would overwrite their entitlements/signatures.
+    """
+    bundles = sorted((p for p in app.rglob("*")
+                      if not p.is_symlink() and p.is_dir()
+                      and p.suffix in (".app", ".xpc", ".framework")),
+                     key=lambda p: len(p.parts), reverse=True)
+    for bundle in bundles:
+        valid = subprocess.run(["/usr/bin/codesign", "--verify", "--deep", "--strict",
+                                "--all-architectures", str(bundle)], capture_output=True)
+        if valid.returncode:
+            run("/usr/bin/codesign", "--force", "--sign", "-", "--timestamp=none", bundle)
+    run("/usr/bin/codesign", "--force", "--sign", "-", "--timestamp=none",
+        "--identifier", BUNDLE_ID, app)
+    run("/usr/bin/codesign", "--verify", "--deep", "--strict", "--all-architectures", app)
+
+
 def package(built_app, output):
     output.mkdir(parents=True, exist_ok=True)
     commit = run("git", "-C", REPO, "rev-parse", "HEAD")
@@ -59,6 +79,7 @@ def package(built_app, output):
                     SUAllowsAutomaticUpdates=False)
         info_path.write_bytes(plistlib.dumps(info, sort_keys=False))
         cpu_architectures = architectures(app)
+        seal_app(app)
         version = info["CFBundleShortVersionString"]
         archive_name = f"nimble_commander_personal_{version}_{commit[:9]}.zip"
         archive_path = output / archive_name
@@ -69,7 +90,7 @@ def package(built_app, output):
         manifest = dict(archive=archive_name, sha256=hashlib.sha256(archive_path.read_bytes()).hexdigest(),
                         version=version, source_commit=commit,
                         source_url=f"https://github.com/jmb275/nimble-commander/tree/{commit}",
-                        bundle_id=BUNDLE_ID, architectures=cpu_architectures,
+                        bundle_id=BUNDLE_ID, architectures=cpu_architectures, code_signing="ad-hoc",
                         built_at=datetime.now(timezone.utc).isoformat())
         (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     shutil.copy2(REPO / "Scripts/install_personal.py", output / "install_personal.py")

@@ -132,6 +132,8 @@ def install(package_dir, user_root, check_only=False):
         info = plistlib.loads((incoming / "Contents/Info.plist").read_bytes())
         if info.get("CFBundleIdentifier") != BUNDLE_ID or info.get("NCSourceCommit") != manifest["source_commit"]:
             raise RuntimeError("The packaged app identity does not match the manifest")
+        # Check the complete bundle before replacing anything or launching code.
+        command("/usr/bin/codesign", "--verify", "--deep", "--strict", "--all-architectures", incoming)
         previous_app = stage / "previous.app"
         replaced_app = False
         replaced_config = False
